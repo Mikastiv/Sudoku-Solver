@@ -46,15 +46,16 @@ void printBoard(std::vector<int>& board)
 		}
 		std::cout << board[i] << " ";	
 	}
+	std::cout << std::endl << std::endl;
 }
 
-bool rowValid(int pos, const std::vector<int>& board)
+bool rowValid(int pos, int number, const std::vector<int>& board)
 {
 	const int row = pos / 9;
 
 	for (int i = row * 9; i < row * 9 + 9; i++)
 	{
-		if (i != pos && board[i] == board[pos])
+		if (i != pos && board[i] == number)
 		{
 			return false;
 		}
@@ -62,13 +63,13 @@ bool rowValid(int pos, const std::vector<int>& board)
 	return true;
 }
 
-bool colValid(int pos, const std::vector<int>& board)
+bool colValid(int pos, int number, const std::vector<int>& board)
 {
 	const int col = pos % 9;
 
 	for (int i = col; i < 81; i += 9)
 	{
-		if (i != pos && board[i] == board[pos])
+		if (i != pos && board[i] == number)
 		{
 			return false;
 		}
@@ -76,7 +77,7 @@ bool colValid(int pos, const std::vector<int>& board)
 	return true;
 }
 
-bool squareValid(int pos, const std::vector<int>& board)
+bool squareValid(int pos, int number, const std::vector<int>& board)
 {
 	const int row = pos / 9;
 	const int col = pos % 9;
@@ -89,7 +90,7 @@ bool squareValid(int pos, const std::vector<int>& board)
 	{
 		for (int j = 0; j < 9 * 3; j += 9)
 		{
-			if (i + j != pos && board[i + j] == board[pos])
+			if (i + j != pos && board[i + j] == number)
 			{
 				return false;
 			}
@@ -98,16 +99,16 @@ bool squareValid(int pos, const std::vector<int>& board)
 	return true;
 }
 
-bool numberValid(int pos, const std::vector<int>& board)
+bool numberValid(int pos, int number, const std::vector<int>& board)
 {
-	return rowValid(pos, board) && colValid(pos, board) && squareValid(pos, board);
+	return rowValid(pos, number, board) && colValid(pos, number, board) && squareValid(pos, number, board);
 }
 
 int findEmpty(const std::vector<int>& board)
 {
-	for (const int i : board)
+	for (size_t i = 0; i < board.size(); i++)
 	{
-		if (i == 0)
+		if (board[i] == 0)
 		{
 			return i;
 		}
@@ -125,12 +126,15 @@ bool solve(std::vector<int>& board)
 
 	for (int i = 1; i <= 9; i++)
 	{
-		board[pos] = i;
+		if (numberValid(pos, i, board))
+		{
+			board[pos] = i;
 
-		if (solve(board))
-			return true;
+			if (solve(board))
+				return true;
 
-		board[i] = 0;
+			board[pos] = 0;
+		}
 	}
 
 	return false;
@@ -139,10 +143,24 @@ bool solve(std::vector<int>& board)
 int main()
 {
 	std::vector<int> board(81, 0);
-
 	loadBoard("board.txt", board);
 	printBoard(board);
-	std::cout << std::endl;
+
+	for (size_t i = 0; i < board.size(); i++)
+	{
+		const int value = board[i];
+		if (value == 0)
+		{
+			continue;
+		}
+
+		if (!numberValid(i, board[i], board))
+		{
+			std::cout << "Board is unsolvable" << std::endl;
+			return -1;
+		}
+	}
+
 	solve(board);
 	printBoard(board);
 }
