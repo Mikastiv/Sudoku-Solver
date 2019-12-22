@@ -19,7 +19,7 @@ void loadBoard(std::string filename, std::vector<int>& board)
 			}
 
 			const int value = c - '0';
-			if (value > 9 || value < 1)
+			if (value > 9 || value < 0)
 			{
 				throw std::runtime_error("Bad number in file: " + c + '\n');
 			}
@@ -105,12 +105,35 @@ bool numberValid(int pos, const std::vector<int>& board)
 
 int findEmpty(const std::vector<int>& board)
 {
-	return 1;
+	for (const int i : board)
+	{
+		if (i == 0)
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 bool solve(std::vector<int>& board)
 {
-	return true;
+	int pos = findEmpty(board);
+	if (pos == -1)
+	{
+		return true;
+	}
+
+	for (int i = 1; i <= 9; i++)
+	{
+		board[pos] = i;
+
+		if (solve(board))
+			return true;
+
+		board[i] = 0;
+	}
+
+	return false;
 }
 
 int main()
@@ -119,5 +142,7 @@ int main()
 
 	loadBoard("board.txt", board);
 	printBoard(board);
-
+	std::cout << std::endl;
+	solve(board);
+	printBoard(board);
 }
